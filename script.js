@@ -39,7 +39,8 @@ function showTask() {
 }
 showTask();
 
-let [millisecondes, seconds, minutes, hours] = [0, 0, 0, 0];
+
+
 let timeRef = document.querySelector(".timer-display");
 let int = null;
 
@@ -47,42 +48,38 @@ document.getElementById("start-timer").addEventListener("click", () => {
   if (int != null) {
     clearInterval(int);
   }
-  int = setInterval(displayTimer, 10);
+  const startTime = Date.now();
+  localStorage.setItem("startTime", startTime);
+
+  int = setInterval(() => displayTimer(startTime), 10);
 });
 
 document.getElementById("pause-timer").addEventListener("click", () => {
   clearInterval(int);
+  localStorage.removeItem("startTime");
 });
 
 document.getElementById("reset-timer").addEventListener("click", () => {
   clearInterval(int);
-  [ seconds, minutes, hours] = [0, 0, 0, 0];
-  timeRef.innerHTML = "00 : 00 : 00 : 000";
+  timeRef.innerHTML = "00 : 00 : 00 : 00";
+  localStorage.removeItem("startTime");
 });
 
-function displayTimer() {
-  millisecondes += 10;
-  if (millisecondes == 1000) {
-    millisecondes = 0;
-    seconds++;
-    if (seconds == 60) {
-      seconds = 0;
-      minutes++;
-      if (minutes == 60) {
-        minutes = 0;
-        hours++;
-      }
-    }
-  }
-  let h = hours < 10 ? "0" + hours : hours;
-  let m = minutes < 10 ? "0" + minutes : minutes;
-  let s = seconds < 10 ? "0" + seconds : seconds;
-  let ms =
-    millisecondes < 10
-      ? "00" + millisecondes
-      : millisecondes < 100
-      ? "0" + millisecondes
-      : millisecondes;
+function displayTimer(startTime) {
+  const now = Date.now();
+  const elapsedTime = now - startTime;
 
-      timeRef.innerHTML = `${h} : ${m} : ${s} : ${ms}`;
+  const h = Math.floor(elapsedTime / 3600000);
+  const m = Math.floor((elapsedTime % 3600000) / 60000);
+  const s = Math.floor((elapsedTime % 60000) / 1000);
+  const ms = Math.floor((elapsedTime % 1000) / 10); // Convert to 2-digit milliseconds
+
+  timeRef.innerHTML = `${h < 10 ? "0" + h : h} : ${m < 10 ? "0" + m : m} : ${s < 10 ? "0" + s : s} : ${ms < 10 ? "0" + ms : ms}`;
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const startTime = localStorage.getItem("startTime");
+  if (startTime) {
+    int = setInterval(() => displayTimer(Number(startTime)), 10);
+  }
+});
