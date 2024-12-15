@@ -1,20 +1,37 @@
 const inputBox = document.getElementById("input-box");
 const listContainer = document.getElementById("list-container");
+let editTaskElement = null;
 
 function addTask() {
   if (inputBox.value === "") {
     alert("Please Input Task");
   } else {
-    let li = document.createElement("li");
-    li.innerHTML = inputBox.value;
+    if (editTaskElement) {
+      editTaskElement.querySelector(".task-text").innerText = inputBox.value;
+      editTaskElement = null;
+    } else {
+      let li = document.createElement("li");
 
-    let buttonsDiv = document.createElement("div");
-    let spanDelete = document.createElement("span");
-    spanDelete.innerHTML = "\u00D7"; // × icon for delete
-    buttonsDiv.appendChild(spanDelete);
+      let taskText = document.createElement("span");
+      taskText.innerText = inputBox.value;
+      taskText.classList.add("task-text");
 
-    li.appendChild(buttonsDiv);
-    listContainer.appendChild(li);
+      let buttonsDiv = document.createElement("div");
+
+      let spanEdit = document.createElement("span");
+      spanEdit.innerHTML = "\u270E"; // Pencil icon for edit
+      spanEdit.classList.add("button-icon");
+      buttonsDiv.appendChild(spanEdit);
+
+      let spanDelete = document.createElement("span");
+      spanDelete.innerHTML = "\u00D7"; // × icon for delete
+      spanDelete.classList.add("button-icon");
+      buttonsDiv.appendChild(spanDelete);
+
+      li.appendChild(taskText);
+      li.appendChild(buttonsDiv);
+      listContainer.appendChild(li);
+    }
   }
   inputBox.value = "";
   saveData();
@@ -23,12 +40,16 @@ function addTask() {
 listContainer.addEventListener(
   "click",
   function (e) {
-    if (e.target.tagName === "LI") {
-      e.target.classList.toggle("checked");
+    if (e.target.classList.contains("task-text")) {
+      e.target.parentElement.classList.toggle("checked");
       saveData();
     } else if (e.target.innerHTML === "\u00D7") {
       e.target.parentElement.parentElement.remove();
       saveData();
+    } else if (e.target.innerHTML === "\u270E") {
+      editTaskElement = e.target.parentElement.parentElement;
+      inputBox.value = editTaskElement.querySelector(".task-text").innerText;
+      inputBox.focus();
     }
   },
   false
@@ -62,6 +83,7 @@ document.getElementById("start-timer").addEventListener("click", () => {
     int = setInterval(() => displayTimer(startTime), 10);
     paused = false;
     localStorage.setItem("timerState", "running");
+    localStorage.setItem("startTime", startTime);
   }
 });
 
@@ -80,6 +102,7 @@ document.getElementById("reset-timer").addEventListener("click", () => {
   timeRef.innerHTML = "00 : 00 : 00 : 00";
   localStorage.removeItem("elapsedTime");
   localStorage.removeItem("timerState");
+  localStorage.removeItem("startTime");
   elapsedTime = 0;
   paused = true;
 });
@@ -99,9 +122,10 @@ function displayTimer(startTime) {
 document.addEventListener("DOMContentLoaded", () => {
   const savedElapsedTime = localStorage.getItem("elapsedTime");
   const timerState = localStorage.getItem("timerState");
+  const savedStartTime = localStorage.getItem("startTime");
 
-  if (timerState === "running" && savedElapsedTime) {
-    startTime = Date.now() - Number(savedElapsedTime);
+  if (timerState === "running" && savedStartTime) {
+    startTime = Number(savedStartTime);
     int = setInterval(() => displayTimer(startTime), 10);
     paused = false;
   } else if (timerState === "paused" && savedElapsedTime) {
