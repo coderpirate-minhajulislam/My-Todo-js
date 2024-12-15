@@ -93,6 +93,7 @@ ul li.checked::before{
 ul li.checked span.task-text {
     color: #555;
     text-decoration: line-through;
+    user-select: none;
    
 }
 
@@ -148,11 +149,3 @@ ul li span.button-icon:hover {
     align-items: center;
     justify-content: space-around;
 }
-ul li span.task-text { 
-    -webkit-touch-callout: none; /* iOS Safari */ 
-    -webkit-user-select: none; /* Safari */ 
-    -khtml-user-select: none; /* Konqueror HTML */ 
-    -moz-user-select: none; /* Firefox */ 
-    -ms-user-select: none; /* Internet Explorer/Edge */
-     user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
- }
