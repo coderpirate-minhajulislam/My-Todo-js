@@ -53,31 +53,26 @@ showTask();
 let timeRef = document.querySelector(".timer-display");
 let int = null;
 let startTime = null;
-let paused = false;
+let paused = true;
 let elapsedTime = 0;
 
 document.getElementById("start-timer").addEventListener("click", () => {
   if (paused) {
     startTime = Date.now() - elapsedTime;
-  } else {
-    startTime = Date.now();
+    int = setInterval(() => displayTimer(startTime), 10);
+    paused = false;
+    localStorage.setItem("timerState", "running");
   }
-
-  if (int != null) {
-    clearInterval(int);
-  }
-
-  int = setInterval(() => displayTimer(startTime), 10);
-  paused = false;
-  localStorage.setItem("timerState", "running");
 });
 
 document.getElementById("pause-timer").addEventListener("click", () => {
-  clearInterval(int);
-  elapsedTime = Date.now() - startTime;
-  paused = true;
-  localStorage.setItem("elapsedTime", elapsedTime);
-  localStorage.setItem("timerState", "paused");
+  if (!paused) {
+    clearInterval(int);
+    elapsedTime = Date.now() - startTime;
+    paused = true;
+    localStorage.setItem("elapsedTime", elapsedTime);
+    localStorage.setItem("timerState", "paused");
+  }
 });
 
 document.getElementById("reset-timer").addEventListener("click", () => {
@@ -86,7 +81,7 @@ document.getElementById("reset-timer").addEventListener("click", () => {
   localStorage.removeItem("elapsedTime");
   localStorage.removeItem("timerState");
   elapsedTime = 0;
-  paused = false;
+  paused = true;
 });
 
 function displayTimer(startTime) {
