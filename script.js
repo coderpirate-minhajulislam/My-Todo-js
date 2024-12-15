@@ -7,10 +7,14 @@ function addTask() {
   } else {
     let li = document.createElement("li");
     li.innerHTML = inputBox.value;
+
+    let buttonsDiv = document.createElement("div");
+    let spanDelete = document.createElement("span");
+    spanDelete.innerHTML = "\u00D7"; // × icon for delete
+    buttonsDiv.appendChild(spanDelete);
+
+    li.appendChild(buttonsDiv);
     listContainer.appendChild(li);
-    let span = document.createElement("span");
-    span.innerHTML = "\u00D7"; // × icon for delete
-    li.appendChild(span);
   }
   inputBox.value = "";
   saveData();
@@ -22,8 +26,8 @@ listContainer.addEventListener(
     if (e.target.tagName === "LI") {
       e.target.classList.toggle("checked");
       saveData();
-    } else if (e.target.tagName === "SPAN") {
-      e.target.parentElement.remove();
+    } else if (e.target.innerHTML === "\u00D7") {
+      e.target.parentElement.parentElement.remove();
       saveData();
     }
   },
@@ -48,35 +52,46 @@ showTask();
 // Timer functionality
 let timeRef = document.querySelector(".timer-display");
 let int = null;
+let startTime = null;
+let paused = false;
 let elapsedTime = 0;
 
 document.getElementById("start-timer").addEventListener("click", () => {
-  const startTime = Date.now() - elapsedTime;
-  localStorage.setItem("startTime", startTime);
+  if (paused) {
+    startTime = Date.now() - elapsedTime;
+  } else {
+    startTime = Date.now();
+  }
 
   if (int != null) {
     clearInterval(int);
   }
 
   int = setInterval(() => displayTimer(startTime), 10);
+  paused = false;
+  localStorage.setItem("timerState", "running");
 });
 
 document.getElementById("pause-timer").addEventListener("click", () => {
   clearInterval(int);
-  elapsedTime = Date.now() - Number(localStorage.getItem("startTime"));
-  localStorage.removeItem("startTime");
+  elapsedTime = Date.now() - startTime;
+  paused = true;
+  localStorage.setItem("elapsedTime", elapsedTime);
+  localStorage.setItem("timerState", "paused");
 });
 
 document.getElementById("reset-timer").addEventListener("click", () => {
   clearInterval(int);
   timeRef.innerHTML = "00 : 00 : 00 : 00";
-  localStorage.removeItem("startTime");
+  localStorage.removeItem("elapsedTime");
+  localStorage.removeItem("timerState");
   elapsedTime = 0;
+  paused = false;
 });
 
 function displayTimer(startTime) {
   const now = Date.now();
-  const elapsedTime = now - startTime;
+  elapsedTime = now - startTime;
 
   const h = Math.floor(elapsedTime / 3600000);
   const m = Math.floor((elapsedTime % 3600000) / 60000);
@@ -87,9 +102,16 @@ function displayTimer(startTime) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const startTime = localStorage.getItem("startTime");
-  if (startTime) {
-    elapsedTime = Date.now() - Number(startTime);
-    int = setInterval(() => displayTimer(Number(startTime)), 10);
+  const savedElapsedTime = localStorage.getItem("elapsedTime");
+  const timerState = localStorage.getItem("timerState");
+
+  if (timerState === "running" && savedElapsedTime) {
+    startTime = Date.now() - Number(savedElapsedTime);
+    int = setInterval(() => displayTimer(startTime), 10);
+    paused = false;
+  } else if (timerState === "paused" && savedElapsedTime) {
+    elapsedTime = Number(savedElapsedTime);
+    displayTimer(Date.now() - elapsedTime);
+    paused = true;
   }
 });
