@@ -9,7 +9,7 @@ function addTask() {
     li.innerHTML = inputBox.value;
     listContainer.appendChild(li);
     let span = document.createElement("span");
-    span.innerHTML = "\u00d7";
+    span.innerHTML = "\u00D7"; // × icon for delete
     li.appendChild(span);
   }
   inputBox.value = "";
@@ -30,6 +30,12 @@ listContainer.addEventListener(
   false
 );
 
+inputBox.addEventListener("keypress", function (e) {
+  if (e.key === "Enter") {
+    addTask();
+  }
+});
+
 function saveData() {
   localStorage.setItem("data", listContainer.innerHTML);
 }
@@ -39,23 +45,25 @@ function showTask() {
 }
 showTask();
 
-
-
+// Timer functionality
 let timeRef = document.querySelector(".timer-display");
 let int = null;
+let elapsedTime = 0;
 
 document.getElementById("start-timer").addEventListener("click", () => {
+  const startTime = Date.now() - elapsedTime;
+  localStorage.setItem("startTime", startTime);
+
   if (int != null) {
     clearInterval(int);
   }
-  const startTime = Date.now();
-  localStorage.setItem("startTime", startTime);
 
   int = setInterval(() => displayTimer(startTime), 10);
 });
 
 document.getElementById("pause-timer").addEventListener("click", () => {
   clearInterval(int);
+  elapsedTime = Date.now() - Number(localStorage.getItem("startTime"));
   localStorage.removeItem("startTime");
 });
 
@@ -63,6 +71,7 @@ document.getElementById("reset-timer").addEventListener("click", () => {
   clearInterval(int);
   timeRef.innerHTML = "00 : 00 : 00 : 00";
   localStorage.removeItem("startTime");
+  elapsedTime = 0;
 });
 
 function displayTimer(startTime) {
@@ -80,6 +89,7 @@ function displayTimer(startTime) {
 document.addEventListener("DOMContentLoaded", () => {
   const startTime = localStorage.getItem("startTime");
   if (startTime) {
+    elapsedTime = Date.now() - Number(startTime);
     int = setInterval(() => displayTimer(Number(startTime)), 10);
   }
 });
