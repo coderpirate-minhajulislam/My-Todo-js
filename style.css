@@ -98,7 +98,7 @@ ul li.checked span.task-text {
 
 ul li div {
     display: flex;
-    gap: 10px;
+    gap: 5px;
 }
 
 ul li span {
@@ -111,11 +111,11 @@ ul li span.task-text {
 }
 
 ul li span.button-icon {
-    font-size: 22px;
+    font-size: 18px;
     color: #555;
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
+    width:30px;
+    height: 30px;
+    line-height: 30px;
     text-align: center;
     border-radius: 50%;
 }
